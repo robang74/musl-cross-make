@@ -39,6 +39,12 @@ ifneq ($(filter %hf,$(TARGET)),)
 GCC_CONFIG_FOR_TARGET += --with-float=hard
 endif
 
+ifneq ($(findstring arm,$(TARGET)),)
+ifeq ($(shell $(CXX) -v 2>&1 | grep -c "clang"), 1)
+TOOLCHAIN_CONFIG += CXXFLAGS="-fbracket-depth=512 -g -O2"
+endif
+endif
+
 
 MAKE += MULTILIB_OSDIRNAMES=
 MAKE += INFO_DEPS= infodir=
