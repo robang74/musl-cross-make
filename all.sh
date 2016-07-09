@@ -5,7 +5,7 @@ set -e
 export MAKEFLAGS=-j16
 
 if [ ! -e config.mak ]; then
-	echo "MUSL_REPO = https://github.com/acammack-r7/musl" > config.mak
+	echo "MUSL_REPO = https://github.com/busterb/musl" > config.mak
 	echo "MUSL_VER = git-stealthy-loading" >> config.mak
 	cat config.mak.dist >> config.mak
 fi
