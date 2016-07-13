@@ -11,15 +11,17 @@ build() {
 	make TARGET=$1 install >> $1.log
 }
 
-cp config.mak.dist config.mak
-echo 'COMMON_CONFIG += CC="gcc-4.8" CXX="g++-4.8"' > config.mak
-rm -fr tools
-make clean
-make TARGET=i486-linux-musl > toolchain.log
-make TARGET=i486-linux-musl install >> toolchain.log
-mv output tools
-export PATH=`pwd`/tools/bin:$PATH
+if [ ! -e tools/bin ]; then
+	cp config.mak.dist config.mak
+	echo 'COMMON_CONFIG += CC="gcc-4.8" CXX="g++-4.8"' > config.mak
+	rm -fr tools
+	make clean
+	make TARGET=i486-linux-musl > toolchain.log
+	make TARGET=i486-linux-musl install >> toolchain.log
+	mv output tools
+fi
 
+export PATH=`pwd`/tools/bin:$PATH
 echo "MUSL_REPO = https://github.com/busterb/musl" > config.mak
 echo "MUSL_VER = git-stealthy-loading" >> config.mak
 echo 'COMMON_CONFIG += CFLAGS="-g0 -Os" CXXFLAGS="-g0 -Os" LDFLAGS="-s"' >> config.mak
@@ -31,15 +33,14 @@ echo "GCC_CONFIG += --disable-multilib" >> config.mak
 
 build i486-linux-musl
 build x86_64-linux-musl
-build powerpc-linux-musl
+build powerpc-linux-muslsf
 build powerpc64le-linux-musl
-build mips-linux-musl
-build mipsle-linux-musl
+build mips-linux-muslsf
+build mipsel-linux-muslsf
 build mips64-linux-muslsf
 build aarch64-linux-musl
-build arm-linux-musleabi
-build arm-linux-musleabihf
-build sh2eb-linux-muslfdpic
+build armel-linux-musleabi
+build armeb-linux-musleabi
 
 mv output musl-cross
 find musl-cross/bin -type f -executable |xargs strip
