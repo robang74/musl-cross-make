@@ -10,17 +10,17 @@ build() {
 	#make clean
 	echo Building $1
 
-  echo "MUSL_REPO = https://github.com/busterb/musl" > config.mak
-  echo "MUSL_VER = git-stealthy-loading" >> config.mak
-  echo 'COMMON_CONFIG += CFLAGS="-g0 -Os" CXXFLAGS="-g0 -Os" LDFLAGS="-s"' >> config.mak
-  if [ "$UNAME" == 'Linux' ]; then
-    echo 'COMMON_CONFIG += CC="i486-linux-musl-gcc -static --static" CXX="i486-linux-musl-g++ -static --static"' >> config.mak
-  fi
-  echo "COMMON_CONFIG += --disable-nls" >> config.mak
-  echo "GCC_CONFIG += --enable-languages=c,c++" >> config.mak
-  echo "GCC_CONFIG += --disable-libquadmath --disable-decimal-float" >> config.mak
-  echo "GCC_CONFIG += --disable-multilib" >> config.mak
-  echo "$2" >> config.mak
+	echo "MUSL_REPO = https://github.com/busterb/musl" > config.mak
+	echo "MUSL_VER = git-stealthy-loading" >> config.mak
+	echo 'COMMON_CONFIG += CFLAGS="-g0 -Os" CXXFLAGS="-g0 -Os" LDFLAGS="-s"' >> config.mak
+	if [ "$UNAME" == 'Linux' ]; then
+	echo 'COMMON_CONFIG += CC="i486-linux-musl-gcc -static --static" CXX="i486-linux-musl-g++ -static --static"' >> config.mak
+	fi
+	echo "COMMON_CONFIG += --disable-nls" >> config.mak
+	echo "GCC_CONFIG += --enable-languages=c,c++" >> config.mak
+	echo "GCC_CONFIG += --disable-libquadmath --disable-decimal-float" >> config.mak
+	echo "GCC_CONFIG += --disable-multilib" >> config.mak
+	echo "$2" >> config.mak
 
 	make TARGET=$1 > $1.log
 	make TARGET=$1 install >> $1.log
