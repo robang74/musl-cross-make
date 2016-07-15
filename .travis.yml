@@ -1,5 +1,9 @@
 sudo: false
 language: c
+addons:
+  apt:
+    packages:
+      - ca-certificates
 env:
   matrix:
     - TARGET=x86_64-linux-musl
