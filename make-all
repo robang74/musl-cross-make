@@ -13,7 +13,6 @@ build() {
 
 if [ ! -e tools/bin ]; then
 	cp config.mak.dist config.mak
-	echo 'COMMON_CONFIG += CC="gcc-4.8" CXX="g++-4.8"' > config.mak
 	rm -fr tools
 	make clean
 	make TARGET=i486-linux-musl > toolchain.log
