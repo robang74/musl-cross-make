@@ -2,16 +2,31 @@
 
 set -e
 
-export MAKEFLAGS=-j4
+#export MAKEFLAGS=-j4
+
+UNAME=`uname`
 
 build() {
-	make clean
+	#make clean
 	echo Building $1
+
+  echo "MUSL_REPO = https://github.com/busterb/musl" > config.mak
+  echo "MUSL_VER = git-stealthy-loading" >> config.mak
+  echo 'COMMON_CONFIG += CFLAGS="-g0 -Os" CXXFLAGS="-g0 -Os" LDFLAGS="-s"' >> config.mak
+  if [ "$UNAME" == 'Linux' ]; then
+    echo 'COMMON_CONFIG += CC="i486-linux-musl-gcc -static --static" CXX="i486-linux-musl-g++ -static --static"' >> config.mak
+  fi
+  echo "COMMON_CONFIG += --disable-nls" >> config.mak
+  echo "GCC_CONFIG += --enable-languages=c,c++" >> config.mak
+  echo "GCC_CONFIG += --disable-libquadmath --disable-decimal-float" >> config.mak
+  echo "GCC_CONFIG += --disable-multilib" >> config.mak
+  echo "$2" >> config.mak
+
 	make TARGET=$1 > $1.log
 	make TARGET=$1 install >> $1.log
 }
 
-if [ ! -e tools/bin ]; then
+if [ ! -e tools/bin -a "$UNAME" == 'Linux' ]; then
 	cp config.mak.dist config.mak
 	rm -fr tools
 	make clean
@@ -21,14 +36,6 @@ if [ ! -e tools/bin ]; then
 fi
 
 export PATH=`pwd`/tools/bin:$PATH
-echo "MUSL_REPO = https://github.com/busterb/musl" > config.mak
-echo "MUSL_VER = git-stealthy-loading" >> config.mak
-echo 'COMMON_CONFIG += CFLAGS="-g0 -Os" CXXFLAGS="-g0 -Os" LDFLAGS="-s"' >> config.mak
-echo 'COMMON_CONFIG += CC="i486-linux-musl-gcc -static --static" CXX="i486-linux-musl-g++ -static --static"' >> config.mak
-echo "COMMON_CONFIG += --disable-nls" >> config.mak
-echo "GCC_CONFIG += --enable-languages=c,c++" >> config.mak
-echo "GCC_CONFIG += --disable-libquadmath --disable-decimal-float" >> config.mak
-echo "GCC_CONFIG += --disable-multilib" >> config.mak
 
 build i486-linux-musl
 build x86_64-linux-musl
@@ -38,8 +45,8 @@ build mips-linux-muslsf
 build mipsel-linux-muslsf
 build mips64-linux-muslsf
 build aarch64-linux-musl
-build armel-linux-musleabi
-build armeb-linux-musleabi
+build armv5l-linux-musleabi
+build armv5b-linux-musleabi
 
 mv output musl-cross
 set +e
