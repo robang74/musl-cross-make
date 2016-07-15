@@ -43,6 +43,7 @@ build armel-linux-musleabi
 build armeb-linux-musleabi
 
 mv output musl-cross
+set +e
 find musl-cross/bin -type f -executable |xargs strip
 find musl-cross/libexec -type f -executable |xargs strip
 
