@@ -11,4 +11,4 @@ script: |
   TARGET="$TARGET" \
       COMMON_CONFIG="CC='$TARGET-gcc -static --static' CXX='$TARGET-g++ -static --static' CFLAGS='-g0 -Os' CXXFLAGS='-g0 -Os' LDFLAGS='-s' --disable-nls" \
       GCC_CONFIG="--enable-languages=c,c++ --disable-libquadmath --disable-decimal-float" \
-      make && make install
+      make >/dev/null && make install
