@@ -2,12 +2,12 @@
 
 set -e
 
-#export MAKEFLAGS=-j4
+export MAKEFLAGS=-j4
 
 UNAME=`uname`
 
 build() {
-	#make clean
+	make clean
 	echo Building $1
 
 	echo "MUSL_REPO = https://github.com/busterb/musl" > config.mak
@@ -37,6 +37,8 @@ fi
 
 export PATH=`pwd`/tools/bin:$PATH
 
+build armv5l-linux-musleabi
+build armv5b-linux-musleabi
 build i486-linux-musl
 build x86_64-linux-musl
 build powerpc-linux-muslsf
@@ -45,8 +47,6 @@ build mips-linux-muslsf
 build mipsel-linux-muslsf
 build mips64-linux-muslsf
 build aarch64-linux-musl
-build armv5l-linux-musleabi
-build armv5b-linux-musleabi
 
 mv output musl-cross
 set +e
