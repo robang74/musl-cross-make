@@ -20,7 +20,6 @@ build() {
 	echo "GCC_CONFIG += --enable-languages=c,c++" >> config.mak
 	echo "GCC_CONFIG += --disable-libquadmath --disable-decimal-float" >> config.mak
 	echo "GCC_CONFIG += --disable-multilib" >> config.mak
-	echo "GCC_CONFIG += --enable-default-pie" >> config.mak
 	echo "$2" >> config.mak
 
 	make TARGET=$1 > $1.log
@@ -38,16 +37,16 @@ fi
 
 export PATH=`pwd`/tools/bin:$PATH
 
-build armv5l-linux-musleabi
-build armv5b-linux-musleabi
-build i486-linux-musl
-build x86_64-linux-musl
-build powerpc-linux-muslsf
-build powerpc64le-linux-musl
-build mips-linux-muslsf
+build aarch64-linux-musl "GCC_CONFIG += --enable-default-pie"
+build armv5l-linux-musleabi "GCC_CONFIG += --enable-default-pie"
+build armv5b-linux-musleabi "GCC_CONFIG += --enable-default-pie"
+build i486-linux-musl "GCC_CONFIG += --enable-default-pie"
+build x86_64-linux-musl "GCC_CONFIG += --enable-default-pie"
+build powerpc-linux-muslsf "GCC_CONFIG += --enable-default-pie"
+build powerpc64le-linux-musl "GCC_CONFIG += --enable-default-pie"
+build mips64-linux-muslsf "GCC_CONFIG += --enable-default-pie"
 build mipsel-linux-muslsf
-build mips64-linux-muslsf
-build aarch64-linux-musl
+build mips-linux-muslsf
 
 mv output musl-cross
 set +e
