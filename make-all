@@ -20,6 +20,7 @@ build() {
 	echo "GCC_CONFIG += --enable-languages=c,c++" >> config.mak
 	echo "GCC_CONFIG += --disable-libquadmath --disable-decimal-float" >> config.mak
 	echo "GCC_CONFIG += --disable-multilib" >> config.mak
+	echo "GCC_CONFIG += --enable-default-pie" >> config.mak
 	echo "$2" >> config.mak
 
 	make TARGET=$1 > $1.log
