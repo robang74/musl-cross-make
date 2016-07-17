@@ -8,13 +8,14 @@ UNAME=`uname`
 
 build() {
 	make clean
-	echo Building $1
 
 	echo "MUSL_REPO = https://github.com/busterb/musl" > config.mak
 	echo "MUSL_VER = git-stealthy-loading" >> config.mak
 	echo 'COMMON_CONFIG += CFLAGS="-g0 -Os" CXXFLAGS="-g0 -Os" LDFLAGS="-s"' >> config.mak
 	if [ "$UNAME" == 'Linux' ]; then
-	echo 'COMMON_CONFIG += CC="i486-linux-musl-gcc -static --static" CXX="i486-linux-musl-g++ -static --static"' >> config.mak
+		echo 'COMMON_CONFIG += CC="i486-linux-musl-gcc -static --static" CXX="i486-linux-musl-g++ -static --static"' >> config.mak
+	else
+		echo 'COMMON_CONFIG += CC="clang -fbracket-depth=1024" CXX="clang++ -fbracket-depth=1024"' >> config.mak
 	fi
 	echo "COMMON_CONFIG += --disable-nls" >> config.mak
 	echo "GCC_CONFIG += --enable-languages=c,c++" >> config.mak
@@ -22,16 +23,18 @@ build() {
 	echo "GCC_CONFIG += --disable-multilib" >> config.mak
 	echo "$2" >> config.mak
 
-	make TARGET=$1 > $1.log
-	make TARGET=$1 install >> $1.log
+	echo Building $1
+	make TARGET=$1 > $1.log 2>&1
+	echo Installing $1
+	make TARGET=$1 install >> $1.log 2>&1
 }
 
 if [ ! -e tools/bin -a "$UNAME" == 'Linux' ]; then
 	cp config.mak.dist config.mak
 	rm -fr tools
 	make clean
-	make TARGET=i486-linux-musl > toolchain.log
-	make TARGET=i486-linux-musl install >> toolchain.log
+	make TARGET=i486-linux-musl > toolchain.log 2>&1
+	make TARGET=i486-linux-musl install >> toolchain.log 2>&1
 	mv output tools
 fi
 
@@ -53,4 +56,9 @@ set +e
 find musl-cross/bin -type f -executable |xargs strip
 find musl-cross/libexec -type f -executable |xargs strip
 
-tar cavf musl-cross.tar.xz musl-cross
+TAR=tar
+if [ -x /usr/local/bin/gtar ]; then
+	TAR=gtar
+fi
+
+gtar cavf musl-cross.tar.xz musl-cross
