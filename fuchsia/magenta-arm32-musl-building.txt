@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+mkdir -p fuchsia
+popd fuchsia
+git clone https://github.com/richfelker/musl-cross-make
+remote=https://raw.githubusercontent.com/fuchsia-mirror/third_party-gcc_none_toolchains/master/patches
+
+pushd musl-cross-make
+wget -c $remote/gcc-patch.txt -O patches/gcc-5.3.0/0000-gcc.diff
+wget -c $remote/binutils-patch.txt -O patches/binutils-2.25.1/0000-binutils.diff
+echo "6e472ddae565a2b1447e6f2393809bb8799982cf  binutils-2.27.tar.bz2" >hashes/binutils-2.27.tar.bz2.sha1
+cat > config.mak <<EOF
+TARGET = arm-linux-musleabi
+OUTPUT = \${PWD}/../toolchain
+BINUTILS_VER = 2.27
+GCC_VER = 5.3.0
+MPFR_VER = 3.1.3
+MUSL_VER = git-master
+LINUX_VER =
+COMMON_CONFIG += --disable-nls
+COMMON_CONFIG += --enable-gold
+COMMON_CONFIG += --with-debug-prefix-map=\$(PWD)=
+#GCC_CONFIG += --disable-libquadmath --disable-decimal-float
+GCC_CONFIG += --enable-languages=c,c++
+EOF
+make -j$(nproc) install
+popd
+
+TCBIN_PATH=$PWD/toolchain/bin
+export PATH=$TCBIN_PATH:$PATH
+export ARCH_arm_TOOLCHAIN_PREFIX=$(basename $TCBIN_PATH/*gcc | sed -e "s/gcc$//")
+
+git clone https://fuchsia.googlesource.com/magenta
+pushd magenta
+make -j$(nproc) magenta-qemu-arm32
+popd
+
+git clone https://fuchsia.googlesource.com/third_party/qemu
+pushd qemu
+git checkout fuchsia
+INST_PATH=$PWD/../qemu-runtime
+./configure --target-list=arm-softmmu --prefix=$INST_PATH
+# This compilation on Ubuntu 14.04 depends by libtool (deprecated)
+make -j$(nproc) install
+
+export PATH=$INST_PATH/bin:$PATH
+popd
+
+pushd magenta/build-magenta-qemu-arm32
+qemu-system-arm -m 64 -nographic -machine virt -cpu cortex-a15 -kernel magenta.elf
+
+
