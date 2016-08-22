@@ -2,6 +2,6 @@ TO DO LIST
 
 [    ] add gdb to musl-cross-make toolchain 
 [    ] add magenta instead of linux as supported kernel
-[DONE] debug and solve the undefined 'raise' issue
+[    ] debug and solve the undefined 'raise' issue
 [    ] remove deprecated libtool dependency
 - 
