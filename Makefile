@@ -41,6 +41,12 @@ endif
 
 LINUX_SITE = https://cdn.kernel.org/pub/linux/kernel
 
+GCC0_VARS = CFLAGS="-O0 -g0" CXXFLAGS="-O0 -g0"
+GCC0_CONFIG = $(GCC_CONFIG) \
+	--with-newlib --disable-libssp --disable-threads \
+	--disable-shared --disable-libgomp --disable-libatomic \
+	--disable-nls --enable-languages=c
+
 BUILD_DIR = build-$(TARGET)
 
 -include config.mak
