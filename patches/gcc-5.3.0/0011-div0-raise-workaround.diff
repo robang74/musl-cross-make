@@ -1,0 +1,11 @@
+--- gcc-5.3.0/libgcc/config/arm/lib1funcs.S.old	2016-08-21 16:45:26.919341669 +0100
++++ gcc-5.3.0/libgcc/config/arm/lib1funcs.S	2016-08-21 16:45:39.259342107 +0100
+@@ -1346,7 +1346,7 @@ LSYM(Lover12):
+ 
+ 	do_push	{r1, lr}
+ 	mov	r0, #SIGFPE
+-	bl	SYM(raise) __PLT__
++/* 	bl	SYM(hang) __PLT__	*/
+ 	RETLDM	r1
+ 
+ #ifdef __ARM_EABI__
