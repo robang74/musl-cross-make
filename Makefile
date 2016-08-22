@@ -1,5 +1,9 @@
 
 OUTPUT = $(PWD)/output
+<<<<<<< HEAD
+=======
+TARGET = sh2eb-linux-musl
+>>>>>>> sabotage-linux/support_gcc4
 SOURCES = sources
 
 CONFIG_SUB_REV = 3d5db9ebe860
@@ -19,8 +23,28 @@ MPC_SITE = $(GNU_SITE)/mpc
 MPFR_SITE = $(GNU_SITE)/mpfr
 ISL_SITE = http://isl.gforge.inria.fr/
 
+<<<<<<< HEAD
 MUSL_SITE = http://www.musl-libc.org/releases
 MUSL_REPO = git://git.musl-libc.org/musl
+=======
+BINUTILS_CONFIG = $(COMMON_CONFIG)
+GCC_MULTILIB_CONFIG = --disable-multilib --with-multilib-list=
+ifeq ($(TARGET),x86_64-x32-linux-musl)
+GCC_MULTILIB_CONFIG = --with-multilib-list=mx32
+endif
+GCC_LANG_CONFIG = --enable-languages=c,c++,lto
+GCC_CONFIG = $(COMMON_CONFIG) --enable-tls \
+	--disable-libmudflap --disable-libsanitizer \
+	--disable-libquadmath --disable-decimal-float \
+	--with-target-libiberty=no --with-target-zlib=no \
+	--with-system-zlib \
+	$(GCC_LANG_CONFIG) \
+	$(GCC_MULTILIB_CONFIG)
+
+ifeq ($(TARGET),powerpc-linux-musl)
+GCC_CONFIG += --with-long-double-64
+endif
+>>>>>>> sabotage-linux/support_gcc4
 
 LINUX_SITE = https://cdn.kernel.org/pub/linux/kernel
 
@@ -41,6 +65,7 @@ clean:
 	rm -rf gcc-* binutils-* musl-* gmp-* mpc-* mpfr-* isl-* build-* linux-*
 
 distclean: clean
+<<<<<<< HEAD
 	rm -rf sources
 
 
@@ -161,3 +186,99 @@ install: | $(SRC_DIRS) $(BUILD_DIR) $(BUILD_DIR)/Makefile $(BUILD_DIR)/config.ma
 	cd $(BUILD_DIR) && $(MAKE) OUTPUT=$(OUTPUT) $@
 
 endif
+=======
+	rm -rf $(SOURCES)/config.sub $(SOURCES)/*.tar.bz2
+
+steps/configure_gcc0: steps/install_binutils
+steps/configure_gcc: steps/install_musl
+
+
+$(SOURCES)/config.sub:
+	wget -O $@ 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD'
+
+$(SOURCES)/binutils-%:
+	wget -c -O $@.part http://ftp.gnu.org/pub/gnu/binutils/$(notdir $@)
+	mv $@.part $@
+
+$(SOURCES)/gcc-%:
+	wget -c -O $@.part http://ftp.gnu.org/pub/gnu/gcc/$(basename $(basename $(notdir $@)))/$(notdir $@)
+	mv $@.part $@
+
+
+
+steps/extract_binutils: $(SOURCES)/binutils-$(BINUTILS_VER).tar.bz2 $(SOURCES)/config.sub
+	tar jxvf $<
+	cat patches/binutils-$(BINUTILS_VER)/* | ( cd binutils-$(BINUTILS_VER) && patch -p1 )
+	cp $(SOURCES)/config.sub binutils-$(BINUTILS_VER)
+	touch $@
+
+steps/configure_binutils: steps/extract_binutils
+	test -e binutils-$(BINUTILS_VER)/config.status || ( cd binutils-$(BINUTILS_VER) && ./configure $(BINUTILS_CONFIG) )
+	touch $@
+
+steps/build_binutils: steps/configure_binutils
+	cd binutils-$(BINUTILS_VER) && $(MAKE)
+	touch $@
+
+steps/install_binutils: steps/build_binutils
+	cd binutils-$(BINUTILS_VER) && $(MAKE) install
+	touch $@
+
+
+
+
+steps/extract_gcc: $(SOURCES)/gcc-$(GCC_VER).tar.bz2 $(SOURCES)/config.sub
+	tar jxvf $<
+	cat patches/gcc-$(GCC_VER)/* | ( cd gcc-$(GCC_VER) && patch -p1 )
+	cp $(SOURCES)/config.sub gcc-$(GCC_VER)
+	touch $@
+
+steps/configure_gcc0: steps/extract_gcc
+	mkdir -p gcc-$(GCC_VER)/build0
+	test -e gcc-$(GCC_VER)/build0/config.status || ( cd gcc-$(GCC_VER)/build0 && ../configure $(GCC0_CONFIG) )
+	touch $@
+
+steps/build_gcc0: steps/configure_gcc0
+	cd gcc-$(GCC_VER)/build0 && $(MAKE)
+	touch $@
+
+steps/configure_gcc: steps/extract_gcc
+	mkdir -p gcc-$(GCC_VER)/build
+	test -e gcc-$(GCC_VER)/build/config.status || ( cd gcc-$(GCC_VER)/build && ../configure $(GCC_CONFIG) )
+	touch $@
+
+steps/build_gcc: steps/configure_gcc
+	cd gcc-$(GCC_VER)/build && $(MAKE)
+	touch $@
+
+steps/install_gcc: steps/build_gcc
+	cd gcc-$(GCC_VER)/build && $(MAKE) -j1 \
+		install-gcc \
+		install-lto-plugin \
+		install-target-libgcc \
+		install-target-libssp \
+		install-target-libstdc++-v3
+	touch $@
+
+
+
+
+
+steps/clone_musl:
+	test -d musl || git clone -b $(MUSL_TAG) git://git.musl-libc.org/musl musl
+	touch $@
+
+steps/configure_musl: steps/clone_musl steps/build_gcc0
+	cd musl && ./configure $(MUSL_CONFIG)
+	cat patches/musl-complex-hack >> musl/config.mak
+	touch $@
+
+steps/build_musl: steps/configure_musl
+	cd musl && $(MAKE)
+	touch $@
+
+steps/install_musl: steps/build_musl
+	cd musl && $(MAKE) install DESTDIR=$(OUTPUT)/$(TARGET)
+	ln -sfn . $(OUTPUT)/$(TARGET)/usr
+	touch $@
+>>>>>>> sabotage-linux/support_gcc4
