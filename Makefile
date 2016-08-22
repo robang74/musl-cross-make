@@ -17,7 +17,7 @@ GMP_SITE = $(GNU_SITE)/gmp
 MPC_SITE = $(GNU_SITE)/mpc
 MPFR_SITE = $(GNU_SITE)/mpfr
 ISL_SITE = http://isl.gforge.inria.fr/
-MUSL_SITE = http://www.musl-libc.org/releases
+MUSL_SITE = https://www.musl-libc.org/releases
 MUSL_REPO = git://git.musl-libc.org/musl
 
 BINUTILS_CONFIG = $(COMMON_CONFIG)
@@ -26,11 +26,9 @@ GCC_MULTILIB_CONFIG = --disable-multilib --with-multilib-list=
 ifeq ($(TARGET),x86_64-x32-linux-musl)
 GCC_MULTILIB_CONFIG = --with-multilib-list=mx32
 endif
-
 GCC_LANG_CONFIG = --enable-languages=c,c++,lto
 GCC_CONFIG = $(COMMON_CONFIG) --enable-tls \
 	--disable-libmudflap --disable-libsanitizer \
-	--disable-libquadmath --disable-decimal-float \
 	--with-target-libiberty=no --with-target-zlib=no \
 	--with-system-zlib \
 	$(GCC_LANG_CONFIG) \
